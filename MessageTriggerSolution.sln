@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageTrigger", "MessageTrigger\MessageTrigger.csproj", "{463CE20D-B606-4CD2-9568-164598C55602}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{463CE20D-B606-4CD2-9568-164598C55602}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{463CE20D-B606-4CD2-9568-164598C55602}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{463CE20D-B606-4CD2-9568-164598C55602}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{463CE20D-B606-4CD2-9568-164598C55602}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {309A343B-164F-4310-8963-ABE00893E062}
+	EndGlobalSection
+EndGlobal

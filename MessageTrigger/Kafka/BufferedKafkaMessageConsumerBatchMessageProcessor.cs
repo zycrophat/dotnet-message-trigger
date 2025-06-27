@@ -6,13 +6,13 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageConsumer<TKey, TValue>
+    internal class BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue>
     {
         private const int DefaultChannelSize = 256;
         private const int DefaultBatchSize = 64;
         private static readonly TimeSpan DefaultBatchTimeout = TimeSpan.FromMilliseconds(250);
 
-        private readonly ILogger<BufferedKafkaMessageConsumer<TKey, TValue>> logger;
+        private readonly ILogger<BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue>> logger;
         private readonly int channelSize;
         private readonly int batchSize;
         private readonly TimeSpan batchTimeout;
@@ -20,8 +20,8 @@ namespace MessageTrigger.Kafka
         private readonly string topic;
         private readonly IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor;
 
-        public BufferedKafkaMessageConsumer(
-            ILogger<BufferedKafkaMessageConsumer<TKey, TValue>> logger,
+        public BufferedKafkaMessageConsumerBatchMessageProcessor(
+            ILogger<BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue>> logger,
             Func<IConsumer<TKey, TValue>> consumerFactory,
             string topic,
             IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor,
@@ -108,7 +108,6 @@ namespace MessageTrigger.Kafka
                     .ReadAllAsync(
                         async (batch) =>
                         {
-
                             await ProcessBatch(
                                 consumer,
                                 batch,
@@ -185,14 +184,11 @@ namespace MessageTrigger.Kafka
             var kafkaMessages =
                 batch
                 .Select(static consumeResult =>
-                    {
-                        IKafkaMessage<TKey, TValue> x =
-                            new KafkaMessage<TKey, TValue>(
-                                consumeResult.Message.Key,
-                                consumeResult.Message.Value
-                            );
-                        return x;
-                    }
+                    new KafkaMessage<TKey, TValue>(
+                        consumeResult.Message.Key,
+                        consumeResult.Message.Value,
+                        consumeResult.TopicPartitionOffset
+                    )
                 )
                 .ToArray();
             await kafkaMessageBatchProcessor.ProcessAsync(

@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using Confluent.Kafka;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MessageTrigger.Kafka
 {
@@ -6,5 +7,6 @@ namespace MessageTrigger.Kafka
     {
         public TKey Key { get; }
         public TValue Value { get; }
+        public TopicPartitionOffset TopicPartitionOffset { get; }
     }
 }

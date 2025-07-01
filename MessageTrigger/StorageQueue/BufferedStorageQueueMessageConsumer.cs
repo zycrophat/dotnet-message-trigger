@@ -89,27 +89,31 @@ namespace MessageTrigger.StorageQueue
         )
         {
             try
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
+            {
+                cancellationToken.ThrowIfCancellationRequested();
 
-                    return await channelReader
-                        .ReadAllConcurrentlyAsync(
-                            maxDegreeOfParallelism,
-                            cancellationToken,
-                            async messageInTransit =>
-                            {
-                                await ProcessMessageAsync(
-                                    messageInTransit,
-                                    cancellationToken
-                                ).ConfigureAwait(false);
-                            }
-                        ).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
-                    throw;
-                }
+                return await channelReader
+                    .ReadAllConcurrentlyAsync(
+                        maxDegreeOfParallelism,
+                        cancellationToken,
+                        async messageInTransit =>
+                        {
+                            await ProcessMessageAsync(
+                                messageInTransit,
+                                cancellationToken
+                            ).ConfigureAwait(false);
+                        }
+                    ).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
+                throw;
+            }
         }
 
         private async Task WriteMessagesToChannelAsync(
@@ -138,6 +142,10 @@ namespace MessageTrigger.StorageQueue
                     {
                         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {

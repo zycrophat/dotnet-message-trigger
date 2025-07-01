@@ -121,6 +121,10 @@ namespace MessageTrigger.Kafka
                         cancellationToken
                     ).ConfigureAwait(false);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
@@ -141,6 +145,10 @@ namespace MessageTrigger.Kafka
                     cancellationToken.ThrowIfCancellationRequested();
                     var consumeResult = consumer.Consume(cancellationToken);
                     await writer.WriteAsync(consumeResult, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {

@@ -6,7 +6,7 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue>
+    internal class BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue> : IMessageConsumer
     {
         private const int DefaultChannelSize = 256;
         private const int DefaultBatchSize = 64;

@@ -7,7 +7,7 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.StorageQueue
 {
-    public class BufferedStorageQueueMessageConsumer
+    public class BufferedStorageQueueMessageConsumer : IMessageConsumer
     {
         private const int DefaultChannelSize = 256;
         private const int DefaultNumberOfMessagesPerFetch = 32;

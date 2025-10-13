@@ -214,7 +214,7 @@ namespace MessageTrigger.Kafka
                 }
             ).ConfigureAwait(false);
 
-            return [.. partitionToMaxOffset.Select(keyValue => keyValue.Value)];
+            return [.. partitionToMaxOffset.Values ];
         }
     }
 }

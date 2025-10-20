@@ -126,6 +126,7 @@ namespace MessageTrigger.StorageQueue
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    logger.LogDebug("Fetching messages from queue {queue}", queueClient.Name);
                     var response = await queueClient.ReceiveMessagesAsync(
                         numberOfMessagesPerFetch,
                         visibilityTimeout,

@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue> : BufferedKafkaMessageConsumerBatchMessageProcessorBase<TKey, TValue>, IMessageConsumer
+    internal class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>, IMessageConsumer
     {
-        private readonly ILogger<BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue>> logger;
+        private readonly ILogger<BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor;
 
-        public BufferedKafkaMessageConsumerBatchMessageProcessor(
-            ILogger<BufferedKafkaMessageConsumerBatchMessageProcessor<TKey, TValue>> logger,
+        public BufferedKafkaMessageBatchConsumerWithBatchProcessor(
+            ILogger<BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue>> logger,
             Func<IConsumer<TKey, TValue>> consumerFactory,
             string topic,
             IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor,

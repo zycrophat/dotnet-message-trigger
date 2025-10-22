@@ -5,14 +5,14 @@ using System.Collections.Concurrent;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageConsumerSingleMessageProcessor<TKey, TValue> : BufferedKafkaMessageConsumerBatchMessageProcessorBase<TKey, TValue>
+    internal class BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>
     {
-        private readonly ILogger<BufferedKafkaMessageConsumerSingleMessageProcessor<TKey, TValue>> logger;
+        private readonly ILogger<BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IKafkaMessage<TKey, TValue>> kafkaMessageProcessor;
         private readonly int maxDegreeOfParallelism;
 
-        public BufferedKafkaMessageConsumerSingleMessageProcessor(
-            ILogger<BufferedKafkaMessageConsumerSingleMessageProcessor<TKey, TValue>> logger,
+        public BufferedKafkaMessageBatchConsumerWithParallelProcessor(
+            ILogger<BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue>> logger,
             Func<IConsumer<TKey, TValue>> consumerFactory,
             string topic,
             IMessageProcessor<IKafkaMessage<TKey, TValue>> kafkaMessageProcessor,
@@ -64,7 +64,10 @@ namespace MessageTrigger.Kafka
                 },
                 async (kafkaMessage, cnclToken) =>
                 {
-                    await kafkaMessageProcessor.ProcessAsync(kafkaMessage, cnclToken).ConfigureAwait(false);
+                    await kafkaMessageProcessor.ProcessAsync(
+                        kafkaMessage,
+                        cnclToken
+                    ).ConfigureAwait(false);
                     partitionToMaxOffset.AddOrUpdate(
                         kafkaMessage.TopicPartitionOffset.Partition,
                         kafkaMessage.TopicPartitionOffset,

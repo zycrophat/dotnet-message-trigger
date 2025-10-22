@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using MessageTrigger.Common;
+using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 

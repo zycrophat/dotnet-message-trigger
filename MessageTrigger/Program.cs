@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using MessageTrigger;
-using MessageTrigger.Common;
+using MessageTrigger.Core.Processing;
 using MessageTrigger.Kafka;
 using MessageTrigger.StorageQueue;
 using Microsoft.Extensions.Logging;

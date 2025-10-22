@@ -1,6 +1,4 @@
-﻿using Azure.Storage.Queues;
-
-namespace MessageTrigger.Common
+﻿namespace MessageTrigger.Core.Processing
 {
     public interface IMessageProcessor<in T>
     {

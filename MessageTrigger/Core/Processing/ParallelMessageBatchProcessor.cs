@@ -1,4 +1,4 @@
-﻿namespace MessageTrigger.Common
+﻿namespace MessageTrigger.Core.Processing
 {
     public class ParallelMessageBatchProcessor<T> : IMessageProcessor<IEnumerable<T>>
     {

@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
-using MessageTrigger.Common;
+using MessageTrigger.Core.Consuming;
+using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
 
 namespace MessageTrigger.Kafka

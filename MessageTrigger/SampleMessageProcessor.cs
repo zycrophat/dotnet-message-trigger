@@ -1,5 +1,5 @@
 ﻿using Azure.Storage.Queues.Models;
-using MessageTrigger.Common;
+using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

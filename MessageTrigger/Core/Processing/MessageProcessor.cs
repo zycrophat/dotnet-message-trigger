@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MessageTrigger.Common
+namespace MessageTrigger.Core.Processing
 {
     public class MessageProcessor<T> : IMessageProcessor<T>
     {

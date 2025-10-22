@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using MessageTrigger.Common;
+using MessageTrigger.Core.Consuming;
+using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
 using Open.ChannelExtensions;
 using System.Threading.Channels;

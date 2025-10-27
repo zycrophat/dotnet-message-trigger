@@ -2,13 +2,13 @@
 
 namespace MessageTrigger.Core.Processing
 {
-    public class MessageProcessor<T> : IMessageProcessor<T>
+    public class DelegateMessageProcessor<T> : IMessageProcessor<T>
     {
-        private readonly ILogger<MessageProcessor<T>> logger;
+        private readonly ILogger<DelegateMessageProcessor<T>> logger;
         private readonly Func<T, CancellationToken, Task> messageHandler;
 
-        public MessageProcessor(
-            ILogger<MessageProcessor<T>> logger,
+        public DelegateMessageProcessor(
+            ILogger<DelegateMessageProcessor<T>> logger,
             Func<T, CancellationToken, Task> messageHandler)
         {
             ArgumentNullException.ThrowIfNull(logger);
@@ -22,6 +22,7 @@ namespace MessageTrigger.Core.Processing
             CancellationToken cancellationToken
         )
         {
+            logger.LogDebug("Invoking delegate message handler");
             await messageHandler(queueMessage, cancellationToken).ConfigureAwait(false);
         }
     }

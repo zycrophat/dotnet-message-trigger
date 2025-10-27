@@ -1,11 +1,6 @@
 ﻿using Azure.Storage.Queues.Models;
 using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MessageTrigger
 {
@@ -22,7 +17,7 @@ namespace MessageTrigger
 
         public async Task ProcessAsync(QueueMessage message, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Starting to process message: {MessageId}", message.MessageId);
+            logger.LogInformation("Processing message: {MessageId}", message.MessageId);
             await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken); // Simulate some processing delay
             logger.LogInformation("Finished processing message: {MessageId}", message.MessageId);
         }

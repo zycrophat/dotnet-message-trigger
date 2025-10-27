@@ -1,10 +1,7 @@
 {
   "dependencies": {
-    "secrets1": {
-      "type": "secrets.user"
-    },
     "storage1": {
-      "secretStore": "LocalSecretsFile",
+      "secretStore": null,
       "type": "storage.emulator",
       "connectionId": "StorageConnection"
     }

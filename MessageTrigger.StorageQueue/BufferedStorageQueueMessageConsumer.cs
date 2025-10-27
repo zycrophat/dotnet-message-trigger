@@ -133,7 +133,7 @@ namespace MessageTrigger.StorageQueue
                         visibilityTimeout,
                         cancellationToken
                     ).ConfigureAwait(false);
-                    
+
                     if (response.Value.Length != 0)
                     {
                         foreach (var message in response.Value)

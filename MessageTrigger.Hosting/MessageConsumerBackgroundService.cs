@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace MessageTrigger.Core.Hosting
+namespace MessageTrigger.Hosting
 {
     internal class MessageConsumerBackgroundService : BackgroundService
     {

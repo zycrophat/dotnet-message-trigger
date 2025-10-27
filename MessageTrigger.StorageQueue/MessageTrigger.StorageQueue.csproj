@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Queues" Version="12.24.0" />
-    <PackageReference Include="Open.ChannelExtensions" Version="9.1.0" />
+    <PackageReference Include="Azure.Storage.Queues" />
+    <PackageReference Include="Open.ChannelExtensions" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
 ﻿using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
 using MessageTrigger;
 using MessageTrigger.Core.Processing;
 using MessageTrigger.Kafka;

@@ -84,6 +84,60 @@ namespace MessageTrigger.StorageQueue
             return Channel.CreateBounded<QueueMessageInTransit>(options);
         }
 
+        private async Task WriteMessagesToChannelAsync(
+            ChannelWriter<QueueMessageInTransit> writer,
+            CancellationToken cancellationToken
+        )
+        {
+            while (true)
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    logger.LogDebug("Fetching messages from queue {queue}", queueClient.Name);
+                    var response = await queueClient.ReceiveMessagesAsync(
+                        numberOfMessagesPerFetch,
+                        visibilityTimeout,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+
+                    if (response.Value.Length != 0)
+                    {
+                        foreach (var message in response.Value)
+                        {
+                            await WriteMessageToChannel(writer, message, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+                    else
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An exception has been caught while writing messages to the channel.");
+                    throw;
+                }
+            }
+        }
+
+        private async Task WriteMessageToChannel(ChannelWriter<QueueMessageInTransit> writer, QueueMessage message, CancellationToken cancellationToken)
+        {
+            logger.LogDebug("Received message {MessageId} with pop receipt {PopReceipt}", message.MessageId, message.PopReceipt);
+            var messageInTransit = new QueueMessageInTransit(
+                logger,
+                queueClient,
+                visibilityTimeout,
+                message
+            );
+            messageInTransit.StartUpdateVisibilityTimeout(cancellationToken);
+            await writer.WriteAsync(messageInTransit, cancellationToken).ConfigureAwait(false);
+        }
+
         private async Task<long> DispatchMessageProcessingAsync(
             ChannelReader<QueueMessageInTransit> channelReader,
             CancellationToken cancellationToken
@@ -115,59 +169,6 @@ namespace MessageTrigger.StorageQueue
                 logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
                 throw;
             }
-        }
-
-        private async Task WriteMessagesToChannelAsync(
-            ChannelWriter<QueueMessageInTransit> writer,
-            CancellationToken cancellationToken
-        )
-        {
-            while (true)
-            {
-                try
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    logger.LogDebug("Fetching messages from queue {queue}", queueClient.Name);
-                    var response = await queueClient.ReceiveMessagesAsync(
-                        numberOfMessagesPerFetch,
-                        visibilityTimeout,
-                        cancellationToken
-                    ).ConfigureAwait(false);
-
-                    if (response.Value.Length != 0)
-                    {
-                        foreach (var message in response.Value)
-                        {
-                            await WriteMessageToChannel(writer, message, cancellationToken).ConfigureAwait(false);
-                        }
-                    } else
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "An exception has been caught while writing messages to the channel.");
-                    throw;
-                }
-            }
-        }
-
-        private async Task WriteMessageToChannel(ChannelWriter<QueueMessageInTransit> writer, QueueMessage message, CancellationToken cancellationToken)
-        {
-            logger.LogDebug("Received message {MessageId} with pop receipt {PopReceipt}", message.MessageId, message.PopReceipt);
-            var messageInTransit = new QueueMessageInTransit(
-                logger,
-                queueClient,
-                visibilityTimeout,
-                message
-            );
-            messageInTransit.StartUpdateVisibilityTimeout(cancellationToken);
-            await writer.WriteAsync(messageInTransit, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task ProcessMessageAsync(QueueMessageInTransit queueMessageInTransit, CancellationToken cancellationToken)

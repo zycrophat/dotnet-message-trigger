@@ -34,18 +34,6 @@ namespace MessageTrigger.Kafka
             this.batchTimeout = batchTimeout ?? DefaultBatchTimeout;
         }
 
-        private static void StoreOffsetsForBatch(
-            IConsumer<TKey, TValue> consumer,
-            TopicPartitionOffset[] topicPartitionOffsets
-        )
-        {
-            foreach (var topicPartitionOffset in topicPartitionOffsets)
-            {
-                consumer.StoreOffset(topicPartitionOffset);
-            }
-        }
-
-
         protected override async Task<long> DispatchMessageProcessing(
             IConsumer<TKey, TValue> consumer,
             ChannelReader<ConsumeResult<TKey, TValue>> channelReader,
@@ -98,5 +86,16 @@ namespace MessageTrigger.Kafka
             List<ConsumeResult<TKey, TValue>> batch,
             CancellationToken cancellationToken
         );
+
+        private static void StoreOffsetsForBatch(
+            IConsumer<TKey, TValue> consumer,
+            TopicPartitionOffset[] topicPartitionOffsets
+        )
+        {
+            foreach (var topicPartitionOffset in topicPartitionOffsets)
+            {
+                consumer.StoreOffset(topicPartitionOffset);
+            }
+        }
     }
 }

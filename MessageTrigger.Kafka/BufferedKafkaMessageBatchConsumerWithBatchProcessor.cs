@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>, IMessageConsumer
+    public class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>, IMessageConsumer
     {
         private readonly ILogger<BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor;

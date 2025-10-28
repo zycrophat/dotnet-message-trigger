@@ -5,7 +5,7 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    internal abstract class BufferedKafkaMessageBatchConsumerBase<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public abstract class BufferedKafkaMessageBatchConsumerBase<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
     {
         private const int DefaultBatchSize = 64;
         private const int DefaultChannelSize = 256;
@@ -14,7 +14,7 @@ namespace MessageTrigger.Kafka
         private readonly int batchSize;
         private readonly TimeSpan batchTimeout;
 
-        protected BufferedKafkaMessageBatchConsumerBase(
+        private protected BufferedKafkaMessageBatchConsumerBase(
             ILogger<BufferedKafkaMessageBatchConsumerBase<TKey, TValue>> logger,
             Func<IConsumer<TKey, TValue>> consumerFactory,
             string topic,

@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>
+    public class BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>
     {
         private readonly ILogger<BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IKafkaMessage<TKey, TValue>> kafkaMessageProcessor;

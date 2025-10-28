@@ -6,7 +6,7 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    internal class BufferedKafkaMessageConsumerWithSequentialProcessor<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public class BufferedKafkaMessageConsumerWithSequentialProcessor<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
     {
         private readonly ILogger<BufferedKafkaMessageConsumerWithSequentialProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IKafkaMessage<TKey, TValue>> kafkaMessageProcessor;

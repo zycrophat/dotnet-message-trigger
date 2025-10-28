@@ -4,7 +4,7 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    internal abstract class BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public abstract class BufferedKafkaMessageConsumerBase<TKey, TValue>
     {
         private const int DefaultChannelSize = 256;
         private readonly ILogger<BufferedKafkaMessageConsumerBase<TKey, TValue>> logger;
@@ -12,7 +12,7 @@ namespace MessageTrigger.Kafka
         private readonly Func<IConsumer<TKey, TValue>> consumerFactory;
         private readonly string topic;
 
-        protected BufferedKafkaMessageConsumerBase(
+        private protected BufferedKafkaMessageConsumerBase(
             ILogger<BufferedKafkaMessageConsumerBase<TKey, TValue>> logger,
             Func<IConsumer<TKey, TValue>> consumerFactory,
             string topic,

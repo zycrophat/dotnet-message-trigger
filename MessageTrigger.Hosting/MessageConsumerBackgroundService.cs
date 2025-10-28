@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MessageTrigger.Hosting
 {
-    internal class MessageConsumerBackgroundService : BackgroundService
+    public class MessageConsumerBackgroundService : BackgroundService
     {
         private readonly ILogger<MessageConsumerBackgroundService> logger;
         private readonly IMessageConsumer messageConsumer;

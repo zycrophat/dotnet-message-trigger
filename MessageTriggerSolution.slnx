@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="MessageTrigger.Core/MessageTrigger.Core.csproj" />
+  <Project Path="MessageTrigger.Hosting/MessageTrigger.Hosting.csproj" />
+  <Project Path="MessageTrigger.Kafka/MessageTrigger.Kafka.csproj" />
+  <Project Path="MessageTrigger.StorageQueue/MessageTrigger.StorageQueue.csproj" />
+  <Project Path="MessageTrigger/MessageTrigger.csproj" />
+</Solution>

@@ -58,7 +58,7 @@ namespace MessageTrigger.Kafka
             await Parallel.ForEachAsync(
                 kafkaMessages,
                 new ParallelOptions
-                { 
+                {
                     CancellationToken = cancellationToken,
                     MaxDegreeOfParallelism = maxDegreeOfParallelism
                 },
@@ -79,7 +79,7 @@ namespace MessageTrigger.Kafka
                 }
             ).ConfigureAwait(false);
 
-            return [.. partitionToMaxOffset.Values ];
+            return [.. partitionToMaxOffset.Values];
         }
     }
 }

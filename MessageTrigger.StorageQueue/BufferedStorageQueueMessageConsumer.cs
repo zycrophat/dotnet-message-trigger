@@ -56,7 +56,7 @@ namespace MessageTrigger.StorageQueue
                     WriteMessagesToChannelAsync(channel.Writer, cnclToken);
                 var dispatchMessageProcessingTask =
                     DispatchMessageProcessingAsync(channel.Reader, cnclToken);
-                
+
                 var completedTask = await Task.WhenAny(
                     writeMessagesToChannelTask,
                     dispatchMessageProcessingTask
@@ -173,7 +173,7 @@ namespace MessageTrigger.StorageQueue
 
         private async Task ProcessMessageAsync(QueueMessageInTransit queueMessageInTransit, CancellationToken cancellationToken)
         {
-            using(queueMessageInTransit)
+            using (queueMessageInTransit)
             {
                 var queueMessage = queueMessageInTransit.QueueMessage;
                 await storageQueueMessageProcessor.ProcessAsync(

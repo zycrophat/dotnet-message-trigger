@@ -22,7 +22,7 @@
                 CancellationToken = cancellationToken,
                 MaxDegreeOfParallelism = maxDegreeOfParallelism
             };
-            
+
             await Parallel.ForEachAsync(
                 batch,
                 parallelOptions,

@@ -6,7 +6,7 @@ using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    public class BufferedKafkaMessageConsumerWithSequentialProcessor<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public partial class BufferedKafkaMessageConsumerWithSequentialProcessor<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
     {
         private readonly ILogger<BufferedKafkaMessageConsumerWithSequentialProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IKafkaMessage<TKey, TValue>> kafkaMessageProcessor;
@@ -57,10 +57,16 @@ namespace MessageTrigger.Kafka
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
+                LogExceptionWhileProcessingBatch(ex);
                 throw;
             }
         }
+
+        [LoggerMessage(
+            LogLevel.Error,
+            Message = "An exception has been caught while processing a batch of messages."
+        )]
+        private partial void LogExceptionWhileProcessingBatch(Exception exception);
 
         private async Task ProcessMessage(
             IConsumer<TKey, TValue> consumer,

@@ -2,10 +2,11 @@
 using MessageTrigger.Core.Consuming;
 using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace MessageTrigger.Kafka
 {
-    public class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>, IMessageConsumer
+    public partial class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>, IMessageConsumer
     {
         private readonly ILogger<BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor;
@@ -33,12 +34,10 @@ namespace MessageTrigger.Kafka
             this.kafkaMessageBatchProcessor = kafkaMessageBatchProcessor;
         }
 
-        protected override async Task<TopicPartitionOffset[]> ProcessMessages(List<ConsumeResult<TKey, TValue>> batch, CancellationToken cancellationToken)
+        protected override async Task<TopicPartitionOffset[]> ProcessMessages(IReadOnlyList<ConsumeResult<TKey, TValue>> batch, CancellationToken cancellationToken)
         {
-            logger.LogDebug(
-                "Processing batch of {BatchSize} messages",
-                batch.Count
-            );
+            ArgumentNullException.ThrowIfNull(batch);
+            LogProcessingBatchOfMessage(batch.Count);
             var kafkaMessages =
                 batch
                 .Select(static consumeResult =>
@@ -70,5 +69,11 @@ namespace MessageTrigger.Kafka
 
             return maxTopicPartitionOffsets;
         }
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            Message = "Processing batch of {batchSize} messages"
+        )]
+        private partial void LogProcessingBatchOfMessage(int batchSize);
     }
 }

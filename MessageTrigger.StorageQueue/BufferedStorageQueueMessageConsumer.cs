@@ -4,11 +4,12 @@ using MessageTrigger.Core.Consuming;
 using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
 using Open.ChannelExtensions;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace MessageTrigger.StorageQueue
 {
-    public class BufferedStorageQueueMessageConsumer : IMessageConsumer
+    public partial class BufferedStorageQueueMessageConsumer : IMessageConsumer
     {
         private const int DefaultChannelSize = 256;
         private const int DefaultNumberOfMessagesPerFetch = 32;
@@ -94,7 +95,7 @@ namespace MessageTrigger.StorageQueue
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    logger.LogDebug("Fetching messages from queue {queue}", queueClient.Name);
+                    LogFetchingMessagesFromQueue(queueClient.Name);
                     var response = await queueClient.ReceiveMessagesAsync(
                         numberOfMessagesPerFetch,
                         visibilityTimeout,
@@ -119,15 +120,32 @@ namespace MessageTrigger.StorageQueue
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "An exception has been caught while writing messages to the channel.");
+                    LogExceptionWhileWritingMessagesToChannel(ex);
                     throw;
                 }
             }
         }
 
+        [LoggerMessage(
+            LogLevel.Debug,
+            Message = "Fetching messages from queue {queue}"
+        )]
+        private partial void LogFetchingMessagesFromQueue(string queue);
+
+        [LoggerMessage(
+            LogLevel.Error,
+            Message = "An exception has been caught while writing messages to the channel."
+        )]
+        private partial void LogExceptionWhileWritingMessagesToChannel(Exception exception);
+
+        [SuppressMessage(
+            "Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = $"Object is getting disposed in {nameof(ProcessMessageAsync)} method"
+        )]
         private async Task WriteMessageToChannel(ChannelWriter<QueueMessageInTransit> writer, QueueMessage message, CancellationToken cancellationToken)
         {
-            logger.LogDebug("Received message {MessageId} with pop receipt {PopReceipt}", message.MessageId, message.PopReceipt);
+            LogReceivedMessage(message.MessageId, message.PopReceipt);
             var messageInTransit = new QueueMessageInTransit(
                 logger,
                 queueClient,
@@ -137,6 +155,12 @@ namespace MessageTrigger.StorageQueue
             messageInTransit.StartUpdateVisibilityTimeout(cancellationToken);
             await writer.WriteAsync(messageInTransit, cancellationToken).ConfigureAwait(false);
         }
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            Message = "Received message {messageId} with pop receipt {popReceipt}"
+        )]
+        private partial void LogReceivedMessage(string messageId, string popReceipt);
 
         private async Task<long> DispatchMessageProcessingAsync(
             ChannelReader<QueueMessageInTransit> channelReader,
@@ -166,10 +190,16 @@ namespace MessageTrigger.StorageQueue
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
+                LogExceptionWhileProcessingBatch(ex);
                 throw;
             }
         }
+
+        [LoggerMessage(
+            LogLevel.Error,
+            Message = "An exception has been caught while processing a batch of messages."
+        )]
+        private partial void LogExceptionWhileProcessingBatch(Exception exception);
 
         private async Task ProcessMessageAsync(QueueMessageInTransit queueMessageInTransit, CancellationToken cancellationToken)
         {
@@ -181,7 +211,7 @@ namespace MessageTrigger.StorageQueue
                     cancellationToken
                 ).ConfigureAwait(false);
                 var popReceipt = await queueMessageInTransit.StopUpdateVisibilityTimeoutAsync().ConfigureAwait(false);
-                logger.LogDebug("Deleting message {MessageId} from the queue with pop receipt {PopReceipt}", queueMessage.MessageId, popReceipt);
+                LogDeletingMessageFromQueue(queueMessage.MessageId, popReceipt);
                 var response = await queueClient.DeleteMessageAsync(
                     queueMessage.MessageId,
                     popReceipt,
@@ -190,7 +220,13 @@ namespace MessageTrigger.StorageQueue
             }
         }
 
-        private class QueueMessageInTransit : IDisposable
+        [LoggerMessage(
+            LogLevel.Debug,
+            Message = "Deleting message {messageId} from the queue with pop receipt {popReceipt}"
+        )]
+        private partial void LogDeletingMessageFromQueue(string messageId, string popReceipt);
+
+        private partial class QueueMessageInTransit : IDisposable
         {
             private readonly ILogger<BufferedStorageQueueMessageConsumer> logger;
             private readonly QueueClient queueClient;
@@ -239,7 +275,7 @@ namespace MessageTrigger.StorageQueue
                         await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                         try
                         {
-                            logger.LogDebug("Updating visibility timeout for message {MessageId} with pop receipt {PopReceipt}", QueueMessage.MessageId, popReceipt);
+                            LogUpdatingVisibilityTimeout(QueueMessage.MessageId, popReceipt);
                             var response = await queueClient.UpdateMessageAsync(
                                 QueueMessage.MessageId,
                                 popReceipt,
@@ -250,12 +286,12 @@ namespace MessageTrigger.StorageQueue
                             if (!response.GetRawResponse().IsError)
                             {
                                 popReceipt = response.Value.PopReceipt;
-                                logger.LogDebug("Visibility timeout updated for message {MessageId} with new pop receipt {PopReceipt}", QueueMessage.MessageId, popReceipt);
+                                LogVisibilityTimeoutUpdated(QueueMessage.MessageId, popReceipt);
                             }
                         }
                         catch (Exception ex) when (ex is not OperationCanceledException)
                         {
-                            logger.LogError(ex, "An exception has been caught while updating the message visibility timeout");
+                            LogExceptionWhileUpdatingVisibilityTimeout(ex);
                         }
                     }
                 }
@@ -265,6 +301,24 @@ namespace MessageTrigger.StorageQueue
                 }
                 return popReceipt;
             }
+
+            [LoggerMessage(
+                LogLevel.Debug,
+                Message = "Updating visibility timeout for message {messageId} with pop receipt {popReceipt}"
+            )]
+            private partial void LogUpdatingVisibilityTimeout(string messageId, string popReceipt);
+
+            [LoggerMessage(
+                LogLevel.Debug,
+                Message = "Visibility timeout updated for message {messageId} with new pop receipt {popReceipt}"
+            )]
+            private partial void LogVisibilityTimeoutUpdated(string messageId, string popReceipt);
+
+            [LoggerMessage(
+                LogLevel.Error,
+                Message = "An exception has been caught while updating the message visibility timeout"
+            )]
+            private partial void LogExceptionWhileUpdatingVisibilityTimeout(Exception exception);
 
             protected virtual void Dispose(bool disposing)
             {

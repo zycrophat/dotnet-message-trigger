@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MessageTrigger
 {
-    internal class SampleMessageProcessor : IMessageProcessor<QueueMessage>
+    internal partial class SampleMessageProcessor : IMessageProcessor<QueueMessage>
     {
         private readonly ILogger<SampleMessageProcessor> logger;
 
@@ -17,9 +17,21 @@ namespace MessageTrigger
 
         public async Task ProcessAsync(QueueMessage message, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Processing message: {MessageId}", message.MessageId);
-            await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken); // Simulate some processing delay
-            logger.LogInformation("Finished processing message: {MessageId}", message.MessageId);
+            LogProcessingMessage(message.MessageId);
+            await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken).ConfigureAwait(false); // Simulate some processing delay
+            LogFinishedProcessingMessage(message.MessageId);
         }
+
+        [LoggerMessage(
+            LogLevel.Information,
+            Message = "Processing message: {messageId}"
+        )]
+        private partial void LogProcessingMessage(string messageId);
+
+        [LoggerMessage(
+            LogLevel.Information,
+            Message = "Finished processing message: {messageId}"
+        )]
+        private partial void LogFinishedProcessingMessage(string messageId);
     }
 }

@@ -34,7 +34,7 @@ var storageQueueMessageConsumer =
 
 try
 {
-    await storageQueueMessageConsumer.ConsumeAsync(cts.Token);
+    await storageQueueMessageConsumer.ConsumeAsync(cts.Token).ConfigureAwait(false);
 }
 catch (OperationCanceledException)
 {

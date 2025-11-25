@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace MessageTrigger.Kafka
 {
-    public class BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>
+    public partial class BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>
     {
         private readonly ILogger<BufferedKafkaMessageBatchConsumerWithParallelProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IKafkaMessage<TKey, TValue>> kafkaMessageProcessor;
@@ -36,13 +36,10 @@ namespace MessageTrigger.Kafka
             this.maxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount;
         }
 
-        protected override async Task<TopicPartitionOffset[]> ProcessMessages(List<ConsumeResult<TKey, TValue>> batch, CancellationToken cancellationToken)
+        protected override async Task<TopicPartitionOffset[]> ProcessMessages(IReadOnlyList<ConsumeResult<TKey, TValue>> batch, CancellationToken cancellationToken)
         {
-            logger.LogInformation(
-                "Processing batch of {BatchSize} messages with max degree of parallelism {MaxDegreeOfParallelism}",
-                batch.Count,
-                maxDegreeOfParallelism
-            );
+            ArgumentNullException.ThrowIfNull(batch);
+            LogProcessingBatchOfMessage(batch.Count, maxDegreeOfParallelism);
             var kafkaMessages =
                 batch
                 .Select(static consumeResult =>
@@ -81,5 +78,11 @@ namespace MessageTrigger.Kafka
 
             return [.. partitionToMaxOffset.Values];
         }
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            Message = "Processing batch of {batchSize} messages with max degree of parallelism {maxDegreeOfParallelism}"
+        )]
+        private partial void LogProcessingBatchOfMessage(int batchSize, int maxDegreeOfParallelism);
     }
 }

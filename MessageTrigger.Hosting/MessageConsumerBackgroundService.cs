@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MessageTrigger.Hosting
 {
-    public class MessageConsumerBackgroundService : BackgroundService
+    public partial class MessageConsumerBackgroundService : BackgroundService
     {
         private readonly ILogger<MessageConsumerBackgroundService> logger;
         private readonly IMessageConsumer messageConsumer;
@@ -25,19 +25,37 @@ namespace MessageTrigger.Hosting
             {
                 try
                 {
-                    logger.LogInformation("Starting message consumption");
+                    LogStartingMessageConsumption();
                     await messageConsumer.ConsumeAsync(stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
                     // Graceful shutdown
-                    logger.LogInformation("Message consumption cancelled");
+                    LogConsumptionCancelled();
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Error in message consumption");
+                    LogErrorInMessageConsumption(ex);
                 }
             }
         }
+
+        [LoggerMessage(
+            LogLevel.Information,
+            Message = "Starting message consumption"
+        )]
+        private partial void LogStartingMessageConsumption();
+
+        [LoggerMessage(
+            LogLevel.Information,
+            Message = "Message consumption cancelled"
+        )]
+        private partial void LogConsumptionCancelled();
+
+        [LoggerMessage(
+            LogLevel.Warning,
+            Message = "Error in message consumption"
+        )]
+        private partial void LogErrorInMessageConsumption(Exception exception);
     }
 }

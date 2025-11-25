@@ -1,10 +1,11 @@
 ﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    public abstract class BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public abstract partial class BufferedKafkaMessageConsumerBase<TKey, TValue>
     {
         private const int DefaultChannelSize = 256;
         private readonly ILogger<BufferedKafkaMessageConsumerBase<TKey, TValue>> logger;
@@ -27,6 +28,11 @@ namespace MessageTrigger.Kafka
             this.channelSize = channelSize;
         }
 
+        [SuppressMessage(
+            "Reliability",
+            "CA2025:Do not pass 'IDisposable' instances into unawaited tasks",
+            Justification = "The tasks are awaited before disposing the passed IDisposable instance"
+        )]
         public async Task ConsumeAsync(CancellationToken cancellationToken)
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -95,11 +101,17 @@ namespace MessageTrigger.Kafka
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "An exception has been caught while writing messages to the channel.");
+                    LogExceptionWhileWritingMessagesToChannel(ex);
                     throw;
                 }
             }
         }
+
+        [LoggerMessage(
+            LogLevel.Error,
+            Message = "An exception has been caught while writing messages to the channel."
+        )]
+        private partial void LogExceptionWhileWritingMessagesToChannel(Exception exception);
 
         protected abstract Task<long> DispatchMessageProcessing(
             IConsumer<TKey, TValue> consumer,

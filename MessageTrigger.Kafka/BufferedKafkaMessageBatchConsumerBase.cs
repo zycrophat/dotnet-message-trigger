@@ -1,11 +1,12 @@
 ﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Open.ChannelExtensions;
+using System.Collections.ObjectModel;
 using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    public abstract class BufferedKafkaMessageBatchConsumerBase<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public abstract partial class BufferedKafkaMessageBatchConsumerBase<TKey, TValue> : BufferedKafkaMessageConsumerBase<TKey, TValue>
     {
         private const int DefaultBatchSize = 64;
         private const int DefaultChannelSize = 256;
@@ -67,10 +68,16 @@ namespace MessageTrigger.Kafka
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An exception has been caught while processing a batch of messages.");
+                LogExceptionWhileProcessingBatch(ex);
                 throw;
             }
         }
+
+        [LoggerMessage(
+            LogLevel.Error,
+            Message = "An exception has been caught while processing a batch of messages."
+        )]
+        private partial void LogExceptionWhileProcessingBatch(Exception exception);
 
         private async Task ProcessBatch(
             IConsumer<TKey, TValue> consumer,
@@ -83,7 +90,7 @@ namespace MessageTrigger.Kafka
         }
 
         abstract protected Task<TopicPartitionOffset[]> ProcessMessages(
-            List<ConsumeResult<TKey, TValue>> batch,
+            IReadOnlyList<ConsumeResult<TKey, TValue>> batch,
             CancellationToken cancellationToken
         );
 

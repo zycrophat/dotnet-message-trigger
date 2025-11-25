@@ -6,6 +6,11 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>c3041b07-c41f-4ff7-8196-75ae6bf86b78</UserSecretsId>
     <OutputType>Exe</OutputType>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <AnalysisModeReliability>All</AnalysisModeReliability>
+    <AnalysisModeSecurity>All</AnalysisModeSecurity>
+    <AnalysisModePerformance>All</AnalysisModePerformance>
   </PropertyGroup>
 
   <ItemGroup>

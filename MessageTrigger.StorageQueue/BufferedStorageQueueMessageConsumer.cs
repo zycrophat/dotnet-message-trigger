@@ -203,7 +203,7 @@ namespace MessageTrigger.StorageQueue
 
         private async Task ProcessMessageAsync(QueueMessageInTransit queueMessageInTransit, CancellationToken cancellationToken)
         {
-            using (queueMessageInTransit)
+            await using (queueMessageInTransit.ConfigureAwait(false))
             {
                 var queueMessage = queueMessageInTransit.QueueMessage;
                 await storageQueueMessageProcessor.ProcessAsync(
@@ -226,14 +226,13 @@ namespace MessageTrigger.StorageQueue
         )]
         private partial void LogDeletingMessageFromQueue(string messageId, string popReceipt);
 
-        private partial class QueueMessageInTransit : IDisposable
+        private partial class QueueMessageInTransit : IAsyncDisposable
         {
             private readonly ILogger<BufferedStorageQueueMessageConsumer> logger;
             private readonly QueueClient queueClient;
             private readonly TimeSpan visibilityTimeout;
             private Task<string> updateVisibilityTimeoutTask = null!;
             private CancellationTokenSource cancellationTokenSourceForVisibilityTimeoutUpdate = null!;
-            private bool disposedValue;
 
             internal QueueMessageInTransit(
                 ILogger<BufferedStorageQueueMessageConsumer> logger,
@@ -320,25 +319,21 @@ namespace MessageTrigger.StorageQueue
             )]
             private partial void LogExceptionWhileUpdatingVisibilityTimeout(Exception exception);
 
-            protected virtual void Dispose(bool disposing)
+            protected virtual async ValueTask DisposeAsyncCore()
             {
-                if (!disposedValue)
+                if (cancellationTokenSourceForVisibilityTimeoutUpdate is not null)
                 {
-                    if (disposing)
-                    {
-                        cancellationTokenSourceForVisibilityTimeoutUpdate.Cancel();
-                        cancellationTokenSourceForVisibilityTimeoutUpdate.Dispose();
-                    }
-
-                    cancellationTokenSourceForVisibilityTimeoutUpdate = null!;
-                    disposedValue = true;
+                    await cancellationTokenSourceForVisibilityTimeoutUpdate.CancelAsync().ConfigureAwait(false);
+                    cancellationTokenSourceForVisibilityTimeoutUpdate.Dispose();
                 }
+
+                cancellationTokenSourceForVisibilityTimeoutUpdate = null!;
             }
 
-            public void Dispose()
+            public async ValueTask DisposeAsync()
             {
                 // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: true);
+                await DisposeAsyncCore().ConfigureAwait(false);
                 GC.SuppressFinalize(this);
             }
         }

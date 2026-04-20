@@ -4,7 +4,6 @@ using MessageTrigger.Core.Consuming;
 using MessageTrigger.Core.Processing;
 using Microsoft.Extensions.Logging;
 using Open.ChannelExtensions;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace MessageTrigger.StorageQueue
@@ -90,6 +89,8 @@ namespace MessageTrigger.StorageQueue
             CancellationToken cancellationToken
         )
         {
+            QueueMessageInTransit?[] messagesInTransit =
+                new QueueMessageInTransit[numberOfMessagesPerFetch];
             while (true)
             {
                 try
@@ -104,9 +105,37 @@ namespace MessageTrigger.StorageQueue
 
                     if (response.Value.Length != 0)
                     {
-                        foreach (var message in response.Value)
+                        try
                         {
-                            await WriteMessageToChannel(writer, message, cancellationToken).ConfigureAwait(false);
+                            Array.Clear(messagesInTransit);
+                            for (int i = 0; i < response.Value.Length; i++)
+                            {
+                                var message = response.Value[i];
+                                LogReceivedMessage(message.MessageId, message.PopReceipt);
+                                var messageInTransit = new QueueMessageInTransit(
+                                    logger,
+                                    queueClient,
+                                    visibilityTimeout,
+                                    message
+                                );
+                                messageInTransit.StartUpdateVisibilityTimeout(cancellationToken);
+                                messagesInTransit[i] = messageInTransit;
+                            }
+                            for (int i = 0; i < response.Value.Length; i++)
+                            {
+                                await WriteMessageToChannel(writer, messagesInTransit[i]!, cancellationToken).ConfigureAwait(false);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            foreach (var maybeMessageInTransit in messagesInTransit)
+                            {
+                                if (maybeMessageInTransit is QueueMessageInTransit messageInTransit)
+                                {
+                                    await messageInTransit.DisposeAsync().ConfigureAwait(false);
+                                }
+                            }
+                            throw;
                         }
                     }
                     else
@@ -123,6 +152,7 @@ namespace MessageTrigger.StorageQueue
                     LogExceptionWhileWritingMessagesToChannel(ex);
                     throw;
                 }
+                              
             }
         }
 
@@ -138,21 +168,9 @@ namespace MessageTrigger.StorageQueue
         )]
         private partial void LogExceptionWhileWritingMessagesToChannel(Exception exception);
 
-        [SuppressMessage(
-            "Reliability",
-            "CA2000:Dispose objects before losing scope",
-            Justification = $"Object is getting disposed in {nameof(ProcessMessageAsync)} method"
-        )]
-        private async Task WriteMessageToChannel(ChannelWriter<QueueMessageInTransit> writer, QueueMessage message, CancellationToken cancellationToken)
+
+        private static async Task WriteMessageToChannel(ChannelWriter<QueueMessageInTransit> writer, QueueMessageInTransit messageInTransit, CancellationToken cancellationToken)
         {
-            LogReceivedMessage(message.MessageId, message.PopReceipt);
-            var messageInTransit = new QueueMessageInTransit(
-                logger,
-                queueClient,
-                visibilityTimeout,
-                message
-            );
-            messageInTransit.StartUpdateVisibilityTimeout(cancellationToken);
             await writer.WriteAsync(messageInTransit, cancellationToken).ConfigureAwait(false);
         }
 

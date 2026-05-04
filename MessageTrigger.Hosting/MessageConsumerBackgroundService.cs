@@ -54,7 +54,7 @@ namespace MessageTrigger.Hosting
 
         [LoggerMessage(
             LogLevel.Warning,
-            Message = "Error in message consumption"
+            Message = "Error in message consumption. Restarting message consumer."
         )]
         private partial void LogErrorInMessageConsumption(Exception exception);
     }

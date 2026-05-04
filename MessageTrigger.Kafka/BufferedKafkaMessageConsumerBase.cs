@@ -1,11 +1,12 @@
 ﻿using Confluent.Kafka;
+using MessageTrigger.Core.Consuming;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace MessageTrigger.Kafka
 {
-    public abstract partial class BufferedKafkaMessageConsumerBase<TKey, TValue>
+    public abstract partial class BufferedKafkaMessageConsumerBase<TKey, TValue> : IMessageConsumer
     {
         private const int DefaultChannelSize = 256;
         private readonly ILogger<BufferedKafkaMessageConsumerBase<TKey, TValue>> logger;

@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace MessageTrigger.Kafka
 {
-    public partial class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>, IMessageConsumer
+    public partial class BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue> : BufferedKafkaMessageBatchConsumerBase<TKey, TValue>
     {
         private readonly ILogger<BufferedKafkaMessageBatchConsumerWithBatchProcessor<TKey, TValue>> logger;
         private readonly IMessageProcessor<IEnumerable<IKafkaMessage<TKey, TValue>>> kafkaMessageBatchProcessor;

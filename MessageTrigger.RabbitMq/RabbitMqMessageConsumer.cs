@@ -12,7 +12,7 @@ namespace MessageTrigger.RabbitMq
         private readonly ConnectionFactory connectionFactory;
         private readonly IMessageProcessor<BasicDeliverEventArgs> messageProcessor;
         private readonly string queueName;
-        private readonly Func<Exception, bool> isTransient;
+        private readonly Func<Exception, bool> IsTransient;
 
         public RabbitMqMessageConsumer(
             ILogger<RabbitMqMessageConsumer> logger,
@@ -31,7 +31,7 @@ namespace MessageTrigger.RabbitMq
             this.connectionFactory = connectionFactory;
             this.messageProcessor = messageProcessor;
             this.queueName = queueName;
-            this.isTransient = isTransient;
+            IsTransient = isTransient;
         }
 
         public RabbitMqMessageConsumer(
@@ -98,22 +98,11 @@ namespace MessageTrigger.RabbitMq
             }
             catch (Exception ex)
             {
-                if (isTransient(ex))
-                {
-                    await channel.BasicRejectAsync(
-                        ea.DeliveryTag,
-                        requeue: true,
-                        ea.CancellationToken
-                    ).ConfigureAwait(false);
-                }
-                else
-                {
-                    await channel.BasicRejectAsync(
-                        ea.DeliveryTag,
-                        requeue: false,
-                        ea.CancellationToken
-                    ).ConfigureAwait(false);
-                }
+                await channel.BasicRejectAsync(
+                    ea.DeliveryTag,
+                    requeue: IsTransient(ex),
+                    ea.CancellationToken
+                ).ConfigureAwait(false);
             }
         }
 

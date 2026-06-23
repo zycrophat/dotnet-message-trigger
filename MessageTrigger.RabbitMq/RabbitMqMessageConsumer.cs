@@ -75,6 +75,11 @@ namespace MessageTrigger.RabbitMq
                     consumer: consumer,
                     cancellationToken: cancellationToken
                 ).ConfigureAwait(false);
+
+                await Task.Delay(
+                    -1,
+                    cancellationToken
+                ).ConfigureAwait(false);
             } catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 LogExceptionDuringConsumption(ex);
